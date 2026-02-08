@@ -6,7 +6,6 @@ from awsglue.context import GlueContext
 from awsglue.job import Job
 from awsglue.dynamicframe import DynamicFrame
 
-
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
 sc = SparkContext()
@@ -25,12 +24,14 @@ accel_trusted_dyf = glueContext.create_dynamic_frame.from_catalog(
     database="stedi",
     table_name="accelerometer_trusted"
 )
+
 joined_dyf = Join.apply(
     frame1=customer_trusted_dyf,
     frame2=accel_trusted_dyf,
     keys1=["email"],
     keys2=["user"]
 )
+
 customer_fields_dyf = SelectFields.apply(
     frame=joined_dyf,
     paths=[
@@ -42,9 +43,12 @@ customer_fields_dyf = SelectFields.apply(
     ]
 )
 
-customer_curated_dyf = DropDuplicates.apply(
-    frame=customer_fields_dyf,
-    keys=["email"]
+customer_fields_df = customer_fields_dyf.toDF()
+customer_curated_df = customer_fields_df.dropDuplicates(["email"])
+customer_curated_dyf = DynamicFrame.fromDF(
+    customer_curated_df,
+    glueContext,
+    "customer_curated_dyf"
 )
 
 sink = glueContext.getSink(
@@ -61,7 +65,7 @@ sink.setCatalogInfo(
     catalogDatabase="stedi",
     catalogTableName="customer_curated"
 )
+
 sink.writeFrame(customer_curated_dyf)
 
 job.commit()
-
