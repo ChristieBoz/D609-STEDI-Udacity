@@ -1,9 +1,10 @@
 import sys
-from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
+from awsglue.dynamicframe import DynamicFrame
+
 
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
@@ -14,39 +15,49 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
-accelerometer_trusted_dyf = glueContext.create_dynamic_frame.from_catalog(
-    database="stedi",
-    table_name="accelerometer_trusted"
-)
-
-step_trainer_trusted_dyf = glueContext.create_dynamic_frame.from_catalog(
+step_df = glueContext.create_dynamic_frame.from_catalog(
     database="stedi",
     table_name="step_trainer_trusted"
+).toDF()
+
+accel_df = glueContext.create_dynamic_frame.from_catalog(
+    database="stedi",
+    table_name="accelerometer_trusted"
+).toDF()
+
+
+filtered_steps_df = step_df.join(
+    accel_df,
+    step_df["sensorreadingtime"] == accel_df["timestamp"],
+    how="left_semi"
 )
 
-joined_dyf = Join.apply(
-    frame1=step_trainer_trusted_dyf,
-    frame2=accelerometer_trusted_dyf,
-    keys1=["sensorreadingtime"],
-    keys2=["timestamp"]
+final_df = filtered_steps_df.join(
+    accel_df,
+    filtered_steps_df["sensorreadingtime"] == accel_df["timestamp"],
+    how="inner"
 )
 
-machine_learning_curated_dyf = SelectFields.apply(
-    frame=joined_dyf,
-    paths=[
-        "x",
-        "y",
-        "z",
-        "distancefromobject"
-    ]
+
+ml_df = final_df.select(
+    "x",
+    "y",
+    "z",
+    "distancefromobject"
 )
+
+
+ml_dyf = DynamicFrame.fromDF(
+    ml_df,
+    glueContext,
+    "machine_learning_curated_dyf"
+)
+
 
 sink = glueContext.getSink(
     path="s3://christina-stedi-datalake/curated/machine_learning/",
     connection_type="s3",
-    updateBehavior="UPDATE_IN_DATABASE",
-    enableUpdateCatalog=True,
-    partitionKeys=[]
+    enableUpdateCatalog=True
 )
 
 sink.setFormat("glueparquet")
@@ -55,6 +66,5 @@ sink.setCatalogInfo(
     catalogTableName="machine_learning_curated"
 )
 
-sink.writeFrame(machine_learning_curated_dyf)
-
+sink.writeFrame(ml_dyf)
 job.commit()
