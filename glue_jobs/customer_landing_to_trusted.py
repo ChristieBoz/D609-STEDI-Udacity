@@ -20,9 +20,9 @@ customer_landing_dyf = glueContext.create_dynamic_frame.from_catalog(
 )
 
 customer_trusted_dyf = Filter.apply(
-  frame=customer_landing_dyf,
-  f=lambda row: row["sharewithresearchasofdate"] is not None
-                and row["sharewithresearchasofdate"] != ""
+    frame=customer_landing_dyf,
+    f=lambda row: row["sharewithresearchasofdate"] is not None
+                  and row["sharewithresearchasofdate"] != ""
 )                
 
 sink = glueContext.getSink(
