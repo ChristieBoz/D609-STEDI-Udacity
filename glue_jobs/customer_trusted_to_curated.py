@@ -28,8 +28,8 @@ joined_dyf = Join.apply(
     frame2=accel_trusted_dyf,
     keys1=["email"],
     keys2=["user"]
-)
-customer_curated_dyf = SelectFields.apply(
+
+customer_fields_dyf = SelectFields.apply(
     frame=joined_dyf,
     paths=[
         "customerName",
@@ -39,6 +39,12 @@ customer_curated_dyf = SelectFields.apply(
         "serialNumber"
     ]
 )
+
+customer_curated_dyf = DropDuplicates.apply(
+    frame=customer_fields_dyf,
+    keys=["email"]
+)
+
 sink = glueContext.getSink(
     path="s3://christina-stedi-datalake/curated/customers/",
     connection_type="s3",
