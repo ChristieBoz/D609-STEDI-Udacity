@@ -41,7 +41,7 @@ accel_df = accelerometer_trusted_dyf.toDF().withColumn(
 
 joined_df = step_df.join(
     accel_df,
-    on=["time_sec", "serialnumber"], 
+    on=["time_sec", 
     how="inner"
 )
 
