@@ -21,9 +21,9 @@ customer_landing_dyf = glueContext.create_dynamic_frame.from_catalog(
 
 customer_trusted_dyf = Filter.apply(
     frame=customer_landing_dyf,
-    f=lambda row: row["sharewithresearchasofdate"] is not None
-                  and row["sharewithresearchasofdate"] != ""
-)                
+    f=lambda row: row["shareWithResearchAsOfDate"] is not None
+                  and row["shareWithResearchAsOfDate"] != ""
+)               
 
 sink = glueContext.getSink(
     path="s3://christina-stedi-datalake/trusted/customer/",
