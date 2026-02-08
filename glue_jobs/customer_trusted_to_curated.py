@@ -28,7 +28,7 @@ joined_dyf = Join.apply(
     frame2=accel_trusted_dyf,
     keys1=["email"],
     keys2=["user"]
-
+)
 customer_fields_dyf = SelectFields.apply(
     frame=joined_dyf,
     paths=[
