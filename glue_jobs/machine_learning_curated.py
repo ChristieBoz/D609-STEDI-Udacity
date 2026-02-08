@@ -24,36 +24,22 @@ accelerometer_trusted_dyf = glueContext.create_dynamic_frame.from_catalog(
     table_name="accelerometer_trusted"
 )
 
-customer_curated_dyf = glueContext.create_dynamic_frame.from_catalog(
-    database="stedi",
-    table_name="customer_curated"
-)
-
-step_accel_dyf = Join.apply(
+step_accel_joined_dyf = Join.apply(
     frame1=step_trainer_trusted_dyf,
     frame2=accelerometer_trusted_dyf,
     keys1=["sensorreadingtime"],
     keys2=["timestamp"]
 )
 
-
-ml_joined_dyf = Join.apply(
-    frame1=step_accel_dyf,
-    frame2=customer_curated_dyf,
-    keys1=["serialnumber"],
-    keys2=["serialNumber"]
-)
-
 ml_curated_dyf = SelectFields.apply(
-    frame=ml_joined_dyf,
+    frame=step_accel_joined_dyf,
     paths=[
         "sensorreadingtime",
         "serialnumber",
         "distancefromobject",
         "x",
         "y",
-        "z",
-        "email"
+        "z"
     ]
 )
 
@@ -72,8 +58,6 @@ sink.setCatalogInfo(
     catalogTableName="machine_learning_curated"
 )
 
-
 sink.writeFrame(ml_curated_dyf)
 
 job.commit()
-
