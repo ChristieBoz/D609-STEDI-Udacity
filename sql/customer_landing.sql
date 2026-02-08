@@ -1,14 +1,14 @@
 CREATE EXTERNAL TABLE IF NOT EXISTS stedi.customer_landing (
-  customername              string,
+  customerName              string,
   email                     string,
   phone                     string,
-  birthday                  string,
-  serialnumber              string,
-  registrationdate          bigint,
-  lastupdatedate            bigint,
-  sharewithresearchasofdate bigint,
-  sharewithpublicasofdate   bigint,
-  sharewithfriendsasofdate  bigint
+  birthDay                  string,
+  serialNumber              string,
+  registrationDate          bigint,
+  lastUpdateDate            bigint,
+  shareWithResearchAsOfDate bigint,
+  shareWithPublicAsOfDate   bigint,
+  shareWithFriendsAsOfDate  bigint
 )
 ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
 WITH SERDEPROPERTIES (
@@ -16,4 +16,3 @@ WITH SERDEPROPERTIES (
 )
 LOCATION 's3://christina-stedi-datalake/landing/customer/'
 TBLPROPERTIES ('has_encrypted_data'='false');
-
