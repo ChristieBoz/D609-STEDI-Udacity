@@ -1,96 +1,131 @@
-# D609 – STEDI Human Balance Analytics Udacity
+# D609 – STEDI Human Balance Analytics (Udacity)
 
-This repository provides an AWS Glue ETL pipeline that sets up Landing, Trusted, and Curated zones for the STEDI Human Balance Analytics project. Data transformations are checked with Amazon Athena, and screenshots show the results.
+This project sets up an AWS Glue ETL pipeline that takes raw JSON data from Amazon S3, adds privacy filters and updates the schema, and then creates datasets ready for analytics and machine learning.
 
-The pipeline uses Amazon S3, AWS Glue Studio, AWS Glue Data Catalog, and Amazon Athena.
+The solution uses a Landing to Trusted to Curated data lake architecture with the following tools:
+- Amazon S3  
+- AWS Glue Studio  
+- AWS Glue Data Catalog  
+- Amazon Athena
 
 ## Landing Zone
 
-Glue Jobs
+### Glue Jobs
+These Glue jobs read data from the S3 landing locations:
 
-These Glue Studio jobs load raw JSON data from S3 into the Landing Zone:
+`customer_landing_to_trusted.py`
+`accelerometer_landing_to_trusted.py`
+`step_trainer_landing_to_trusted.py`
 
-* customer_landing_to_trusted.py
-* accelerometer_landing_to_trusted.py
-* step_trainer_landing_to_trusted.py
+### SQL Landing Tables
+These SQL DDL scripts were used to create landing tables in the Glue Console:e:
 
-SQL Tables 
+`sql/customer_landing.sql`  
+`sql/accelerometer_landing.sql`  
+`sql/step_trainer_landing.sql`
 
-Landing tables were set up manually in the Glue Console with SQL DDL scripts:
+All JSON fields from input files are included and appropriately typed.
 
-* sql/customer_landing.sql
-* sql/accelerometer_landing.sql
-* sql/step_trainer_landing.sql
+### Athena Validation — Landing Zone
 
-All fields from the source JSON data are included and have the correct data types.
+#### customer_landing
+![customer_landing](screenshots/customer_landing.png)
 
-Athena Validation
+Count: **956 rows**  
+The customer_landing table contains rows with blank `shareWithResearchAsOfDate`.
 
-* customer_landing: 956 rows
-* accelerometer_landing: 81,273 rows
-* step_trainer_landing: 28,680 rows
+#### accelerometer_landing
+![accelerometer_landing](screenshots/accelerometer_landing.png)
 
-Screenshots:
+Count: **81,273 rows**
 
-* screenshots/customer_landing.png
-* screenshots/accelerometer_landing.png
-* screenshots/step_trainer_landing.png
+#### step_trainer_landing
+![step_trainer_landing](screenshots/step_trainer_landing.png)
+
+Count: **28,680 rows**
 
 ## Trusted Zone
 
-Glue Jobs
+### Glue Jobs with Dynamic Catalog Updates
+These trusted jobs are configured to dynamically update the Glue Catalog schema:
 
-These jobs are set up to update the Glue Data Catalog schema automatically:
+`customer_landing_to_trusted.py`  
+`accelerometer_landing_to_trusted.py`  
+`step_trainer_trusted.py`
 
-* customer_landing_to_trusted.py
-* accelerometer_landing_to_trusted.py
-* step_trainer_trusted.py
+These jobs include:
 
-These jobs have the following settings:
-
+```python
 enableUpdateCatalog=True
 updateBehavior="UPDATE_IN_DATABASE"
+```
 
-Athena Validation
+### Athena Validation - Trusted Zone
 
-* customer_trusted: 482 rows
-* accelerometer_trusted: 40,981 rows
-* step_trainer_trusted: 14,460 rows
+#### customer_trusted
+![customer_trusted](screenshots/customer_trusted.png)
 
-These results show that:
+Count: **482 rows**  
+There are no rows with blank `shareWithResearchAsOfDate`.
 
-* customer_trusted has no blank shareWithResearchAsOfDate values.
+#### accelerometer_trusted
+![accelerometer_trusted](screenshots/accelerometer_trusted.png)
 
-Screenshots:
+Count: **40,981 rows**
 
-* screenshots/customer_trusted.png
-* screenshots/accelerometer_trusted.png
-* screenshots/step_trainer_trusted.png
+#### step_trainer_trusted
+![step_trainer_trusted](screenshots/step_trainer_trusted.png)
+
+Count: **14,460 rows**
 
 ## Curated Zone
 
-customer_curated
+### customer_curated
 
-Glue Job: customer_trusted_to_curated.py
-Join: customer_trusted INNER JOIN accelerometer_trusted ON email
-Result: customer_curated (customer columns only)
-Athena Validation: 482 rows
-Screenshot: screenshots/customer_curated.png
+**Glue Job:** `customer_trusted_to_curated.py`  
+This performs an inner join between `customer_trusted` and `accelerometer_trusted` on customer email and outputs only customer columns.
 
-machine_learning_curated
+#### Athena Validation
+![customer_curated](screenshots/customer_curated.png)
 
-Glue Job: machine_learning_curated.py
-Join: step_trainer_trusted INNER JOIN accelerometer_trusted
-Condition: sensorReadingTime = timestamp
-Result: machine_learning_curated
-Athena Validation: 43,681 rows
-Screenshot: screenshots/machine_learning_curated.png
+Count: **482 rows**
 
-Repository Structure
 
+### machine_learning_curated
+
+**Glue Job:** `machine_learning_curated.py`  
+This performs an inner join between `step_trainer_trusted` and `accelerometer_trusted` using matching timestamps.
+
+#### Athena Validation
+![machine_learning_curated](screenshots/machine_learning_curated.png)
+
+Count: **43,681 rows**
+
+
+## Repository Structure
+
+```
 D609-STEDI-Udacity/
-glue_jobs/
-sql/
-screenshots/
-README.md
+├── glue_jobs/
+│   ├── customer_landing_to_trusted.py
+│   ├── accelerometer_landing_to_trusted.py
+│   ├── step_trainer_trusted.py
+│   ├── customer_trusted_to_curated.py
+│   └── machine_learning_curated.py
+├── sql/
+│   ├── customer_landing.sql
+│   ├── accelerometer_landing.sql
+│   └── step_trainer_landing.sql
+├── screenshots/
+│   ├── customer_landing.png
+│   ├── accelerometer_landing.png
+│   ├── step_trainer_landing.png
+│   ├── customer_trusted.png
+│   ├── accelerometer_trusted.png
+│   ├── step_trainer_trusted.png
+│   ├── customer_curated.png
+│   └── machine_learning_curated.png
+└── README.md
+```
+
 
