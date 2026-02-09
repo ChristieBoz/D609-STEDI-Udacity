@@ -69,7 +69,6 @@ Screenshots are included in the /screenshots directory.
 
 Trusted Zone
 
-Purpose
 
 The Trusted Zone removes data that does not meet privacy requirements and ensures schema consistency.
 
