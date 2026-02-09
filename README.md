@@ -89,8 +89,8 @@ Screenshot: screenshots/machine_learning_curated.png
 Repository Structure
 
 D609-STEDI-Udacity/
-├── glue_jobs/
-├── sql/
-├── screenshots/
-└── README.md
+glue_jobs/
+sql/
+screenshots/
+README.md
 
