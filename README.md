@@ -36,8 +36,6 @@ Screenshots:
 * screenshots/accelerometer_landing.png
 * screenshots/step_trainer_landing.png
 
----
-
 ## Trusted Zone
 
 Glue Jobs
@@ -87,8 +85,6 @@ Condition: sensorReadingTime = timestamp
 Result: machine_learning_curated
 Athena Validation: 43,681 rows
 Screenshot: screenshots/machine_learning_curated.png
-
----
 
 Repository Structure
 
