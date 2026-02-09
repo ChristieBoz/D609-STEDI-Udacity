@@ -19,8 +19,6 @@ Each zone is validated using Amazon Athena queries, with screenshots included as
 
 Landing Zone
 
-Purpose
-
 The Landing Zone contains raw JSON data ingested directly from S3 without transformations.
 
 Data Sources
@@ -37,8 +35,6 @@ customer_landing_to_trusted.py
 accelerometer_landing_to_trusted.py
 step_trainer_landing_to_trusted.py
 
-
-
 Each job connects directly to the appropriate S3 bucket.
 
 Glue Tables 
@@ -49,26 +45,17 @@ sql/customer_landing.sql
 sql/accelerometer_landing.sql
 sql/step_trainer_landing.sql
 
- 
-
 All JSON fields from the input files are included and appropriately typed
 
 Athena Validation
 
 Athena queries were run to validate the data:
 
- 
-
 Additional validation proves that customer_landing contains rows with blank shareWithResearchAsOfDate.
-
- 
 
 Screenshots are included in the /screenshots directory.
 
- 
-
 Trusted Zone
-
 
 The Trusted Zone removes data that does not meet privacy requirements and ensures schema consistency.
 
@@ -80,11 +67,7 @@ Create tables in the Glue Data Catalog
 Dynamically infer and update schema
 Update existing tables on subsequent runs
 
- 
-
 This is enabled using:
-
- 
 
 enableUpdateCatalog=True
 
